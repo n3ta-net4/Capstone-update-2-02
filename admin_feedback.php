@@ -23,162 +23,13 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Feedback - Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Helvetica', Arial, sans-serif;
-        }
-        body {
-            display: flex;
-            height: 100vh;
-            background-color: #f5f7fa;
-        }
-        .sidebar {
-            width: 240px;
-            background-color: #2c3e50;
-            color: #fff;
-            padding: 20px;
-            position: fixed;
-            height: 100%;
-            top: 0;
-            left: 0;
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar .logo {
-            text-align: center;
-            margin-bottom: 10px; 
-        }
-        .sidebar .logo img {
-            width: 200px; 
-            margin-bottom: 5px; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-        }
-        .sidebar h2 {
-            color: #ecf0f1;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .sidebar ul {
-            list-style: none;
-            padding-top: 10px; 
-            flex-grow: 1; 
-        }
-        .sidebar ul li {
-            margin-bottom: 15px; 
-        }
-        .sidebar ul li a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px; 
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-radius: 6px;
-            transition: background-color 0.3s ease-in-out;
-        }
-        .sidebar ul li a:hover {
-            background-color: #1abc9c;
-        }
-        .sidebar ul li a.active {
-            background-color: #1abc9c;
-        }
-        .main-content {
-            margin-left: 240px;
-            padding: 30px;
-            width: 100%;
-            background-color: #fff;
-        }
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #cccccc;
-            padding: 15px 30px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-        .top-bar h1 {
-            font-size: 30px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        .btn-logout {
-            background-color: #e74c3c;
-            padding: 10px 20px;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 20px;
-            transition: background-color 0.3s ease-in-out;
-            margin-left: 15px;
-        }
-        .btn-logout:hover {
-            background-color: #c0392b;
-        }
-        .feedback-list {
-            margin-top: 20px;
-        }
-        .feedback-card {
-            background: #fff;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: relative;
-            background: #fff;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: relative;
-        }
-        .delete-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .delete-btn:hover {
-            background: #c0392b;
-        }
-        .star-rating {
-            color: #f1c40f;
-            margin: 5px 0;
-        }
-        hr{
-            border: 0;
-            height: 1px;
-            background: #fff; 
-            margin: 10px 0; 
-        }
-        @media (max-width: 600px) {
-            .main-content {
-                margin-left: 0;
-            }
-            .sidebar {
-                width: 100%;
-                position: relative;
-                height: auto;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/admin_feedback.css">
 </head>
 <body>
     <div class="sidebar">
         <div class="logo">
             <a href="admin_dashboard.php">
-                <img src="aw-k9.png" alt="aw-k9 logo">
+                <img src="css/aw-k9.png" alt="aw-k9 logo">
             </a>
         </div>
         <h2>Admin Dashboard</h2>
@@ -202,7 +53,7 @@ try {
         </div>
 
         <?php if (isset($_SESSION['success'])): ?>
-            <div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 4px;">
+            <div class="alert alert-success">
                 <?php 
                 echo $_SESSION['success'];
                 unset($_SESSION['success']);
@@ -211,7 +62,7 @@ try {
         <?php endif; ?>
 
         <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-error" style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 4px;">
+            <div class="alert alert-error">
                 <?php 
                 echo $_SESSION['error'];
                 unset($_SESSION['error']);
@@ -224,7 +75,7 @@ try {
         <div class="feedback-list">
             <?php foreach ($reviews as $review): ?>
                 <div class="feedback-card">
-                    <form action="delete_feedback.php" method="POST" style="display: inline;">
+                    <form action="delete_feedback.php" method="POST">
                         <input type="hidden" name="feedback_id" value="<?php echo $review['id']; ?>">
                         <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this feedback?')">
                             <i class="fas fa-trash"></i>
@@ -238,27 +89,24 @@ try {
                         <?php endfor; ?>
                     </div>
                     <?php if (!empty($review['services'])): ?>
-                        <div class="services-tags" style="margin: 5px 0;">
+                        <div class="services-tags">
                             <?php 
                             $services = json_decode($review['services'], true);
                             foreach ($services as $service): 
                                 $serviceName = $service === 'pet_grooming' ? 'Pet Grooming' : 'Pet Hotel';
                             ?>
-                                <span style="background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 5px;">
-                                    <?php echo $serviceName; ?>
-                                </span>
+                                <span><?php echo $serviceName; ?></span>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
                     <p><?php echo htmlspecialchars($review['comment']); ?></p>
                     <?php if (!empty($review['image_path'])): ?>
-                        <div class="review-image" style="margin-top: 10px;">
-                            <img src="<?php echo htmlspecialchars($review['image_path']); ?>" 
-                                 alt="Review image" 
-                                 style="max-width: 200px; border-radius: 4px;">
+                        <div class="review-image">
+                            <img src="<?php echo htmlspecialchars($review['image_path']); ?>" alt="Review image">
                         </div>
                     <?php endif; ?>
-                    <small style="color: #666;">Posted on: <?php echo date('F j, Y', strtotime($review['created_at'])); ?></small>                </div>
+                    <small style="color: #666;">Posted on: <?php echo date('F j, Y', strtotime($review['created_at'])); ?></small>
+                </div>
             <?php endforeach; ?>
         </div>
     </div>

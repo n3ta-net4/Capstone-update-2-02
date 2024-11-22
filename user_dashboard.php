@@ -73,24 +73,29 @@ $user = $_SESSION['user'];
                 </div>
             </div>
 
-            <div class="dashboard-section recent-bookings">
-                <h2>Recent Bookings</h2>
-                <div class="booking-list">
-                    <div class="booking-item">
-                        <div class="booking-info">
-                            <h4>Pet Grooming</h4>
-                            <p>Date: Oct 15, 2024</p>
-                            <p>Status: Confirmed</p>
-                        </div>
+            <div class="dashboard-section notifications">
+                <h2>Recent Notifications</h2>
+                <?php
+                $stmt = $pdo->prepare('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 2');
+                $stmt->execute([$user['id']]);
+                $notifications = $stmt->fetchAll();
+
+                if (count($notifications) > 0): ?>
+                    <div class="notification-list">
+                        <?php foreach ($notifications as $notification): ?>
+                            <div class="notification-item <?php echo $notification['type']; ?>">
+                                <div class="notification-content">
+                                    <?php echo htmlspecialchars($notification['message']); ?>
+                                </div>
+                                <div class="notification-time">
+                                    <?php echo date('M j, Y g:i A', strtotime($notification['created_at'])); ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
-                    <div class="booking-item">
-                        <div class="booking-info">
-                            <h4>Pet Boarding</h4>
-                            <p>Date: Oct 10-12, 2024</p>
-                            <p>Status: Completed</p>
-                        </div>
-                    </div>
-                </div>
+                <?php else: ?>
+                    <p class="no-notifications">You have no recent notifications.</p>
+                <?php endif; ?>
             </div>
 
             <div class="dashboard-section announcements">
