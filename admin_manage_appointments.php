@@ -10,7 +10,6 @@ if(!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 
 include "db.php";
 
-// Handle appointment deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     $appointmentId = $_POST['appointment_id'];
     $stmt = $pdo->prepare('DELETE FROM appointments WHERE id = ?');
@@ -20,15 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     exit();
 }
 
-// Get filter parameters
 $status = isset($_GET['status']) ? $_GET['status'] : 'all';
 $date = isset($_GET['date']) ? $_GET['date'] : '';
 
-// Build the query based on filters
 $query = "SELECT a.*, u.name as user_name, u.email, a.notes 
           FROM appointments a 
           JOIN users u ON a.user_id = u.id 
-          WHERE a.status != 'pending'";  // Exclude pending appointments
+          WHERE a.status != 'pending'";
 $params = [];
 
 if ($status !== 'all') {
@@ -70,7 +67,6 @@ $appointments = $stmt->fetchAll();
             background-color: #f5f7fa;
         }
 
-        /* Sidebar styles from admin_appointments.php */
         .sidebar {
             width: 240px;
             background-color: #2c3e50;
@@ -121,7 +117,6 @@ $appointments = $stmt->fetchAll();
             background-color: #1abc9c;
         }
         
-        /* Main content adjustment */
         .main-content {
             margin-left: 240px;
             padding: 30px;
@@ -270,9 +265,7 @@ $appointments = $stmt->fetchAll();
         .button-group {
             display: flex;
             gap: 15px;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
+            margin-top: 15px;
         }
 
         .btn {
@@ -388,6 +381,7 @@ $appointments = $stmt->fetchAll();
             <li><a href="admin_manage_appointments.php" class="active"><i class="fas fa-calendar"></i> Manage Appointments</a></li>
             <li><a href="admin_manage_reservations.php"><i class="fas fa-hotel"></i> Manage Reservations</a></li>
             <li><a href="admin_services.php"><i class="fas fa-bone"></i> Manage Services</a></li>
+            <li><a href="admin_boarding_rates.php"><i class="fas fa-dollar-sign" style="width: 16px; text-align: center;"></i> Manage Rates</a></li>
             <li><a href="admin_feedback.php"><i class="fas fa-comments"></i> Manage Feedback</a></li>
         </ul>
     </div>

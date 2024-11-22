@@ -5,7 +5,8 @@ if(!isset($_SESSION)){
 }
 
 if(!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
-    header("Location: login.php");exit();
+    header("Location: login.php");
+    exit();
 }
 
 include "db.php";
@@ -24,7 +25,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
         $q->execute([$newStatus, $a_id]);
     }
     
-    header('Location: admin_appointments.php');exit();
+    header('Location: admin_appointments.php');
+    exit();
 }
 
 $q = $pdo->prepare("SELECT a.*, u.name as user_name, u.email, a.notes 
@@ -334,6 +336,7 @@ $appointments=$q->fetchAll();
         <li><a href="admin_manage_appointments.php"><i class="fas fa-calendar"></i> Manage Appointments</a></li>
         <li><a href="admin_manage_reservations.php"><i class="fas fa-hotel"></i> Manage Reservations</a></li>
         <li><a href="admin_services.php"><i class="fas fa-bone"></i> Manage Services</a></li>
+        <li><a href="admin_boarding_rates.php"><i class="fas fa-dollar-sign" style="width: 16px; text-align: center;"></i> Manage Rates</a></li>
         <li><a href="admin_feedback.php"><i class="fas fa-comments"></i> Manage Feedback</a></li>
     </ul>
 </div>

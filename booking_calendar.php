@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'user') {
     header("Location: login.php");
     exit();
@@ -8,7 +9,6 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'user') {
 include 'db.php';
 $user = $_SESSION['user'];
 
-// Add handlers for appointment deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete_appointment'])) {
         $stmt = $pdo->prepare('DELETE FROM appointments WHERE id = ? AND user_id = ?');
@@ -25,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date = $_POST['date'];
     $time = $_POST['time'];
@@ -33,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $notes = isset($_POST['notes']) ? trim($_POST['notes']) : '';
     $response = ['success' => false, 'message' => ''];
 
-    // Check for the most recent appointment status
     $stmt = $pdo->prepare('
         SELECT * FROM appointments 
         WHERE appointment_date = ? 
@@ -45,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $existing = $stmt->fetch();
 
     if (!$existing || $existing['status'] === 'rejected') {
-        // Create new appointment regardless of existing rejected ones
         $stmt = $pdo->prepare('
             INSERT INTO appointments 
             (user_id, appointment_date, appointment_time, notes, status, created_at) 
@@ -66,12 +63,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Generate time slots
 function generateTimeSlots() {
     $slots = [];
     $start = strtotime('09:00');
     $end = strtotime('17:00');
-    $interval = 30 * 60; // 30 minutes in seconds
+    $interval = 30 * 60;
 
     for ($time = $start; $time <= $end; $time += $interval) {
         $slots[] = date('H:i', $time);
@@ -81,11 +77,9 @@ function generateTimeSlots() {
 
 $timeSlots = generateTimeSlots();
 
-// Get current month/year if not specified
 $month = isset($_GET['month']) ? (int)$_GET['month'] : date('n');
 $year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
 
-// Ensure we're not showing past months
 if ($year < date('Y') || ($year == date('Y') && $month < date('n'))) {
     $month = date('n');
     $year = date('Y');
@@ -114,13 +108,11 @@ function buildCalendar($month, $year) {
     $monthName = $dateComponents['month'];
     $dayOfWeek = $dateComponents['wday'];
     
-    // Navigation
     $next = getNextMonth($month, $year);
     $prev = getPrevMonth($month, $year);
     
     $calendar = "<div class='calendar'>";
     
-    // Add navigation
     $calendar .= "<div class='calendar-nav'>";
     if ($prev) {
         $calendar .= "<a href='?month={$prev[0]}&year={$prev[1]}'>&lt; Previous</a>";
@@ -158,7 +150,6 @@ function buildCalendar($month, $year) {
     return $calendar;
 }
 
-// Add this PHP function after the other functions and before the HTML
 function checkTimeSlotStatus($date, $time) {
     global $pdo;
     $stmt = $pdo->prepare('
@@ -175,7 +166,6 @@ function checkTimeSlotStatus($date, $time) {
     return ($result && $result !== 'rejected') ? $result : 'available';
 }
 
-// Add this PHP endpoint before the HTML
 if (isset($_GET['check_status'])) {
     $date = $_GET['date'];
     $time = $_GET['time'];
@@ -183,7 +173,6 @@ if (isset($_GET['check_status'])) {
     exit;
 }
 
-// Generate calendar with current month/year
 $calendar = buildCalendar($month, $year);
 ?>
 
@@ -194,614 +183,17 @@ $calendar = buildCalendar($month, $year);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Appointment</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Helvetica', Arial, sans-serif;
-        }
-        
-        body {
-            display: flex;
-            min-height: 100vh;  /* change from height: 100vh to min-height: 100vh */
-            background-color: #f5f7fa;
-        }
-
-        .sidebar {
-            width: 240px;
-            background-color: #2c3e50;
-            color: #fff;
-            padding: 20px;
-            position: fixed;
-            height: 100%;
-            top: 0;
-            left: 0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar .logo {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .sidebar .logo img {
-            width: 200px;
-            margin-bottom: 5px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .sidebar .user-details {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .sidebar .user-details h2 {
-            font-size: 20px;
-            margin-bottom: 3px;
-            font-weight: bold;
-        }
-
-        .sidebar .user-details p {
-            font-size: 20px;
-            color: #ecf0f1;
-        }
-
-        .sidebar .divider {
-            border-bottom: 1px solid #fff;
-            margin: 10px 0;
-        }
-
-        .sidebar ul {
-            list-style: none;
-            padding-top: 10px;
-            flex-grow: 1;
-        }
-
-        .sidebar ul li {
-            margin-bottom: 15px;
-        }
-
-        .sidebar ul li a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-radius: 6px;
-            transition: background-color 0.3s ease-in-out;
-        }
-
-        .sidebar ul li a:hover {
-            background-color: #1abc9c;
-        }
-
-        .sidebar ul li a.active {
-            background-color: #1abc9c;
-        }
-
-        .main-content {
-            margin-left: 240px;
-            padding: 30px;
-            width: calc(100% - 240px);
-            margin-bottom: 0.01px; 
-        }
-
-        .booking-form {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        select, input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        button {
-            background-color: #2c3e50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background-color: #1abc9c;
-        }
-
-        .error-message {
-            color: red;
-            margin-bottom: 10px;
-        }
-        .calendar {
-            max-width: none; /* remove max-width restriction */
-            margin: 0;
-            background: #2c3e50;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            padding: 20px;
-            color: #fff;
-        }
-
-        .calendar-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding: 10px 0;
-        }
-
-        .calendar-nav a {
-            color: #fff;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            background: #34495e;
-            font-weight: 500;
-        }
-
-        .calendar-nav a:hover {
-            background: #1abc9c;
-            color: white;
-        }
-
-        .current-month {
-            font-size: 28px;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            padding: 10px;
-        }
-
-        .calendar-day-header {
-            background: #34495e;
-            color: #fff;
-            padding: 15px 10px;
-            text-align: center;
-            font-weight: 600;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .calendar-day {
-            background: #34495e;
-            border: 1px solid #415b76;
-            border-radius: 8px;
-            padding: 15px;
-            min-height: 100px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            position: relative;
-            color: #fff;
-        }
-
-        .calendar-day:not(.past):not(.empty):hover {
-            background: #1abc9c;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            cursor: pointer;
-            border-color: #1abc9c;
-        }
-
-        .calendar-day.today {
-            background: #1abc9c;
-            border: 2px solid #fff;
-            font-weight: bold;
-        }
-
-        .calendar-day.past {
-            background: #243442;
-            color: #7f8c8d;
-            cursor: not-allowed;
-            border-color: #2c3e50;
-        }
-
-        .calendar-day.empty {
-            background: transparent;
-            border: none;
-        }
-
-        .time-slot-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 1000;
-            max-width: 600px;
-            width: 90%;
-        }
-
-        .time-slot-modal h3 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .time-slots {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-            max-height: 400px;
-            overflow-y: auto;
-            padding: 10px;
-        }
-
-        .time-slot {
-            padding: 12px;
-            text-align: center;
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 16px;
-        }
-
-        .time-slot:hover {
-            background: #2c3e50;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .modal-backdrop {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 999;
-            backdrop-filter: blur(4px);
-            transition: all 0.3s ease;
-        }
-
-        /* Add scrollbar styling */
-        .time-slots::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .time-slots::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .time-slots::-webkit-scrollbar-thumb {
-            background: #2c3e50;
-            border-radius: 4px;
-        }
-
-        .time-slots::-webkit-scrollbar-thumb:hover {
-            background: #1abc9c;
-        }
-
-        .services-container,
-        .services-title,
-        .services-grid,
-        .service-card,
-        .price-list,
-        .service-details,
-        .additional-services {
-            /* Delete these style blocks entirely */
-        }
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .calendar-section {
-            min-width: 0;
-            height: fit-content;
-        }
-
-        .calendar {
-            max-width: none;
-            height: 800px; /* Match appointments-section max-height */
-            margin: 0;
-            background: #2c3e50;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            padding: 20px;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .calendar-grid {
-            flex: 1;
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            padding: 10px;
-            overflow-y: auto;
-        }
-
-        .calendar-day {
-            min-height: 80px; /* Adjusted for better fit */
-            height: auto;
-        }
-
-        .appointments-section {
-            background: #2c3e50;
-            padding: 20px;
-            border-radius: 15px;
-            color: white;
-            max-height: 800px;
-            overflow-y: auto;
-        }
-        /* Add these new styles after your existing styles */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px; /* increased from 5px to 20px */
-            margin-bottom: 30px;
-        }
-
-        .calendar-section {
-            min-width: 0; /* Prevents calendar overflow */
-        }
-
-        .appointments-section {
-            background: #2c3e50;
-            padding: 20px;
-            border-radius: 15px;
-            color: white;
-            max-height: 800px;
-            overflow-y: auto;
-        }
-
-        .appointments-section h2 {
-            margin-bottom: 20px;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .appointment-card {
-            background: #34495e;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border-left: 5px solid transparent;
-        }
-
-        .appointment-card.approved {
-            border-left-color: #2ecc71;
-        }
-
-        .appointment-card.rejected {
-            border-left-color: #e74c3c;
-        }
-
-        .appointment-card.pending {
-            border-left-color: #f1c40f;
-        }
-
-        .appointment-details {
-            margin-bottom: 8px;
-            color: #ecf0f1;
-        }
-
-        .status-approved {
-            color: #2ecc71;
-        }
-
-        .status-rejected {
-            color: #e74c3c;
-        }
-
-        .status-pending {
-            color: #f1c40f;
-        }
-
-        .delete-btn {
-            background-color: #e74c3c;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s;
-        }
-
-        .delete-btn:hover {
-            background-color: #a12d23;
-        }
-
-        .delete-all-btn {
-            background-color: #e74c3c;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            width: 100%;
-            transition: background-color 0.3s;
-        }
-
-        .delete-all-btn:hover {
-            background-color: #a12d23;
-        }
-
-        .no-appointments {
-            text-align: center;
-            color: #ecf0f1;
-            padding: 20px;
-        }
-
-        .rejection-reason {
-            background: rgba(231, 76, 60, 0.2);
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
-        }
-
-        /* Adjust the main content width to fit both columns */
-        .main-content {
-            max-width: 100%;
-            padding: 30px;
-        }
-
-        /* Make the services container full width */
-        .services-container {
-            margin-top: 30px;
-            width: 100%;
-        }
-
-        .message-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
-        .message {
-            padding: 15px 25px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            color: white;
-            opacity: 0;
-            transform: translateX(100%);
-            animation: slideIn 0.5s forwards;
-        }
-
-        .message.success {
-            background-color: #2ecc71;
-        }
-
-        .message.error {
-            background-color: #e74c3c;
-        }
-
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .message.fade-out {
-            animation: fadeOut 0.5s forwards;
-        }
-
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                transform: translateX(100%);
-            }
-        }
-
-        .submit-btn {
-            margin-top: 20px;
-            background-color: #2c3e50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .submit-btn:hover:not(:disabled) {
-            background-color: #1abc9c;
-        }
-
-        .submit-btn:disabled {
-            background-color: #95a5a6;
-            cursor: not-allowed;
-        }
-
-        .time-slot.selected {
-            background-color: #1abc9c !important;
-            color: white !important;
-            border: 2px solid #fff;
-        }
-
-        .notes-container {
-            margin: 20px 0;
-        }
-
-        #appointmentNotes {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            resize: vertical;
-            font-family: inherit;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-
-        .char-counter {
-            text-align: right;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .appointment-details.notes {
-            white-space: pre-line;
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-    </style>
+    <link rel="stylesheet" href="css/booking_calendar.css">
 </head>
 <body>
     <div class="sidebar">
         <div class="logo">
             <a href="user_dashboard.php">
-                <img src="aw-k9.png" alt="aw-k9 logo">
+                <img src="css/aw-k9.png" alt="aw-k9 logo">
             </a>
         </div>
         <div class="user-details">
             <h2><?php echo htmlspecialchars($user['name']); ?></h2>
-            <p><?php echo htmlspecialchars($user['email']); ?></p>
         </div>
         <div class="divider"></div>
         <ul>
@@ -809,7 +201,9 @@ $calendar = buildCalendar($month, $year);
             <li><a href="booking_calendar.php" class="active"><i class="fas fa-calendar-alt"></i>Book Pet Grooming</a></li>
             <li><a href="book_pet_boarding.php"><i class="fas fa-hotel"></i>Book Pet Hotel</a></li>
             <li><a href="services.php"><i class="fas fa-list"></i>Services & Prices</a></li>
+            <li><a href="pet_boarding_rates.php"><i class="fas fa-money-bill"></i>Pet Boarding Rates</a></li>
             <li><a href="feedback.php"><i class="fas fa-comments"></i>Feedback & Reviews</a></li>
+            <li><a href="user_information.php"><i class="fas fa-user"></i>User Information</a></li>
         </ul>
     </div>
 
@@ -827,7 +221,6 @@ $calendar = buildCalendar($month, $year);
             <div class="appointments-section">
                 <h2>My Appointments</h2>
                 <?php
-                // Fetch appointments
                 $stmt = $pdo->prepare('
                     SELECT * FROM appointments 
                     WHERE user_id = ? 
@@ -909,12 +302,12 @@ document.addEventListener('DOMContentLoaded', function() {
         timeSlotsContainer.innerHTML = '';
         
         const now = new Date();
-        const selectedDateObj = new Date(date); // renamed variable to avoid shadowing
+        const selectedDateObj = new Date(date);
         const isToday = selectedDateObj.toDateString() === now.toDateString();
         
         timeSlots.forEach(time => {
             const [hours, minutes] = time.split(':');
-            const slotTime = new Date(selectedDateObj); // use the renamed variable
+            const slotTime = new Date(selectedDateObj);
             slotTime.setHours(parseInt(hours), parseInt(minutes), 0);
             
             const slot = document.createElement('div');
@@ -927,7 +320,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 slot.style.cursor = 'not-allowed';
             } else {
                 slot.className = 'time-slot';
-                // Check slot status
                 fetch(`booking_calendar.php?check_status=1&date=${date}&time=${time}`)
                     .then(response => response.text())
                     .then(status => {
@@ -959,16 +351,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function selectTimeSlot(slotElement, time) {
-        // Remove selected class from all slots
         document.querySelectorAll('.time-slot').forEach(slot => {
             slot.classList.remove('selected');
         });
         
-        // Add selected class to clicked slot
         slotElement.classList.add('selected');
         selectedTime = time;
         
-        // Enable submit button
         submitButton.disabled = false;
     }
 

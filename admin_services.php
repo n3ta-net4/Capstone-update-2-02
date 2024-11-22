@@ -8,7 +8,6 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 include 'db.php';
 $user = $_SESSION['user'];
 
-// Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
@@ -49,11 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch services from database
 $stmt = $pdo->query("SELECT * FROM grooming_services ORDER BY category, service_name");
 $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Group services by category
 $groupedServices = [];
 foreach ($services as $service) {
     $groupedServices[$service['category']][] = $service;
@@ -80,7 +77,6 @@ foreach ($services as $service) {
             background-color: #f5f7fa;
         }
         
-        /* Update sidebar styles to match admin_appointments.php */
         .sidebar {
             width: 240px;
             background-color: #2c3e50;
@@ -131,7 +127,6 @@ foreach ($services as $service) {
             background-color: #1abc9c;
         }
 
-        /* Update main content styles */
         .main-content {
             margin-left: 240px;
             padding: 30px;
@@ -169,7 +164,6 @@ foreach ($services as $service) {
             margin-left: 15px;
         }
 
-        /* Update service cards styling */
         .services-category {
             background: #2c3e50;
             padding: 25px;
@@ -185,8 +179,6 @@ foreach ($services as $service) {
             border-bottom: 2px solid #1abc9c;
         }
 
-        /* ...existing admin controls and modal styles... */
-        
         .admin-controls {
             margin-bottom: 20px;
         }
@@ -340,6 +332,7 @@ foreach ($services as $service) {
             <li><a href="admin_manage_appointments.php"><i class="fas fa-calendar"></i> Manage Appointments</a></li>
             <li><a href="admin_manage_reservations.php"><i class="fas fa-hotel"></i> Manage Reservations</a></li>
             <li><a href="admin_services.php" class="active"><i class="fas fa-bone"></i> Manage Services</a></li>
+            <li><a href="admin_boarding_rates.php"><i class="fas fa-dollar-sign" style="width: 16px; text-align: center;"></i> Manage Rates</a></li>
             <li><a href="admin_feedback.php"><i class="fas fa-comments"></i> Manage Feedback</a></li>
         </ul>
     </div>
@@ -402,7 +395,6 @@ foreach ($services as $service) {
         </div>
     </div>
 
-    <!-- Add/Edit Service Modal -->
     <div id="serviceModal" class="modal">
         <div class="modal-content">
             <form id="serviceForm" method="POST">
@@ -492,5 +484,5 @@ foreach ($services as $service) {
         }
     </script>
 </body>
-</html> 
+</html>
 

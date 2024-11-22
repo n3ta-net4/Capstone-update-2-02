@@ -7,7 +7,6 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
-// Handle deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     $booking_id = $_POST['booking_id'];
     $stmt = $pdo->prepare("DELETE FROM pet_boarding WHERE id = ?");
@@ -17,12 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     exit();
 }
 
-// Get filter parameters
 $status = isset($_GET['status']) ? $_GET['status'] : 'all';
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 
-// Build query based on filter
 $query = "
     SELECT pb.id, pb.pet_name, pb.pet_type, pb.status, pb.notes,
            DATE(pb.check_in) as check_in, 
@@ -385,6 +382,7 @@ $bookings = $stmt->fetchAll();
             <li><a href="admin_manage_appointments.php"><i class="fas fa-calendar"></i> Manage Appointments</a></li>
             <li><a href="admin_manage_reservations.php" class="active"><i class="fas fa-hotel"></i> Manage Reservations</a></li>
             <li><a href="admin_services.php"><i class="fas fa-bone"></i> Manage Services</a></li>
+            <li><a href="admin_boarding_rates.php"><i class="fas fa-dollar-sign" style="width: 16px; text-align: center;"></i> Manage Rates</a></li>
             <li><a href="admin_feedback.php"><i class="fas fa-comments"></i> Manage Feedback</a></li>
         </ul>
     </div>

@@ -7,7 +7,6 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
-// Handle approval/rejection
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $booking_id = $_POST['booking_id'];
     $status = $_POST['action'];
@@ -17,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("UPDATE pet_boarding SET status = ?, rejection_reason = ? WHERE id = ?");
         $stmt->execute([$status, $rejection_reason, $booking_id]);
         
-        // Free up the accommodation if rejected
         $stmt = $pdo->prepare("
             UPDATE accommodations a 
             JOIN pet_boarding pb ON a.id = pb.accommodation_id 
@@ -34,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-// Update the SELECT query to include notes
 $stmt = $pdo->query("
     SELECT pb.id, pb.pet_name, pb.pet_type, pb.notes,
            DATE(pb.check_in) as check_in, 
@@ -268,7 +265,6 @@ $bookings = $stmt->fetchAll();
             margin: 0;
         }
 
-        /* Add these modal styles */
         .modal {
             display: none;
             position: fixed;
@@ -303,7 +299,7 @@ $bookings = $stmt->fetchAll();
             if (action === 'approved') {
                 return confirm(`Are you sure you want to approve the booking for ${petName}?`);
             }
-            return true; // Don't show confirmation for reject since we'll show modal
+            return true;
         }
 
         function showRejectionModal(bookingId) {
@@ -317,7 +313,6 @@ $bookings = $stmt->fetchAll();
             document.getElementById('rejectionModal').style.display = 'none';
         }
 
-        // Add this window click handler
         window.onclick = function(event) {
             var modal = document.getElementById('rejectionModal');
             if (event.target == modal) {
@@ -342,6 +337,7 @@ $bookings = $stmt->fetchAll();
             <li><a href="admin_manage_appointments.php"><i class="fas fa-calendar"></i> Manage Appointments</a></li>
             <li><a href="admin_manage_reservations.php"><i class="fas fa-hotel"></i> Manage Reservations</a></li>
             <li><a href="admin_services.php"><i class="fas fa-bone"></i> Manage Services</a></li>
+            <li><a href="admin_boarding_rates.php"><i class="fas fa-dollar-sign" style="width: 16px; text-align: center;"></i> Manage Rates</a></li>
             <li><a href="admin_feedback.php"><i class="fas fa-comments"></i> Manage Feedback</a></li>
         </ul>
     </div>
@@ -409,7 +405,6 @@ $bookings = $stmt->fetchAll();
         <?php endif; ?>
     </div>
 
-    <!-- Replace the existing modal HTML with this updated version -->
     <div id="rejectionModal" class="modal">
         <div class="modal-content">
             <h3>Rejection Reason</h3>

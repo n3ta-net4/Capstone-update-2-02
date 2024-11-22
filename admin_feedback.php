@@ -7,7 +7,6 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
-// Fetch all reviews from database
 try {
     $stmt = $pdo->query("SELECT id, user_name, rating, comment, created_at, image_path, services FROM feedback ORDER BY created_at DESC");
     $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -191,6 +190,7 @@ try {
             <li><a href="admin_manage_appointments.php"><i class="fas fa-calendar"></i> Manage Appointments</a></li>
             <li><a href="admin_manage_reservations.php"><i class="fas fa-hotel"></i> Manage Reservations</a></li>
             <li><a href="admin_services.php"><i class="fas fa-bone"></i> Manage Services</a></li>
+            <li><a href="admin_boarding_rates.php"><i class="fas fa-dollar-sign" style="width: 16px; text-align: center;"></i> Manage Rates</a></li>
             <li><a href="admin_feedback.php" class="active"><i class="fas fa-comments"></i> Manage Feedback</a></li>
         </ul>
     </div>

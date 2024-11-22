@@ -163,6 +163,7 @@ $admin = $_SESSION['user'];
         <li><a href="admin_manage_appointments.php"><i class="fas fa-calendar"></i> Manage Appointments</a></li>
         <li><a href="admin_manage_reservations.php"><i class="fas fa-hotel"></i> Manage Reservations</a></li>
         <li><a href="admin_services.php"><i class="fas fa-bone"></i> Manage Services</a></li>
+        <li><a href="admin_boarding_rates.php"><i class="fas fa-dollar-sign" style="width: 16px; text-align: center;"></i> Manage Rates</a></li>
         <li><a href="admin_feedback.php"><i class="fas fa-comments"></i> Manage Feedback</a></li>
     </ul>
 </div>

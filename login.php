@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <button class="back-button" onclick="window.location.href='main.php';">
-        <img src="dog-paw.png" alt="back_button">
+        <img src="css/dog-paw.png" alt="back_button">
     </button>
     <span class="back-text">Click paw to go back</span>
     <div class="auth-container">
