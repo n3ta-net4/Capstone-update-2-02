@@ -53,7 +53,8 @@ try {
         <div class="top-bar">
             <h1>Feedback & Reviews</h1>
             <div>
-                <button class="btn-notifications">Notifications</button>
+                <a href="notifications.php">
+                <button class="btn-notifications">Notifications</button></a>
                 <a href="logout.php" class="btn-logout">Logout</a>
             </div>
         </div>

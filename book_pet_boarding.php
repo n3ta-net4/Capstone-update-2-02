@@ -69,8 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="top-bar">
             <h1 class="top-bar__title">Pet Boarding</h1>
             <div class="top-bar__actions">
-                <button class="top-bar__button btn-notifications">Notifications</button>
-                <a href="logout.php" class="top-bar__button">Logout</a>
+            <a href="notifications.php" class="btn-grooming-notifications">Notifications</a>
+            <a href="logout.php" class="btn-grooming-logout">Logout</a>
             </div>
         </div>
         <br>

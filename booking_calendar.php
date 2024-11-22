@@ -11,17 +11,34 @@ $user = $_SESSION['user'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete_appointment'])) {
+        $stmt = $pdo->prepare('DELETE FROM notifications WHERE appointment_id = ?');
+        $stmt->execute([$_POST['appointment_id']]);
+        
         $stmt = $pdo->prepare('DELETE FROM appointments WHERE id = ? AND user_id = ?');
         $stmt->execute([$_POST['appointment_id'], $user['id']]);
+        
         header("Location: booking_calendar.php");
         exit();
     }
     
     if (isset($_POST['delete_all'])) {
-        $stmt = $pdo->prepare('DELETE FROM appointments WHERE user_id = ?');
-        $stmt->execute([$user['id']]);
-        header("Location: booking_calendar.php");
-        exit();
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare('DELETE n FROM notifications n 
+                INNER JOIN appointments a ON n.appointment_id = a.id 
+                WHERE a.user_id = ?');
+            $stmt->execute([$user['id']]);
+            
+            $stmt = $pdo->prepare('DELETE FROM appointments WHERE user_id = ?');
+            $stmt->execute([$user['id']]);
+            
+            $pdo->commit();
+            header("Location: booking_calendar.php");
+            exit();
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            die("An error occurred: " . $e->getMessage());
+        }
     }
 }
 
@@ -49,6 +66,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             VALUES (?, ?, ?, ?, "pending", CURRENT_TIMESTAMP)
         ');
         $stmt->execute([$user_id, $date, $time, $notes]);
+        
+        $appointment_id = $pdo->lastInsertId();
+        
+        $message = "Your appointment request for {$date} at {$time} has been submitted and is pending approval.";
+        $stmt = $pdo->prepare('
+            INSERT INTO notifications 
+            (user_id, message, type, appointment_id, created_at) 
+            VALUES (?, ?, "appointment", ?, CURRENT_TIMESTAMP)
+        ');
+        $stmt->execute([$user_id, $message, $appointment_id]);
         
         $response['success'] = true;
         $response['message'] = "Appointment booked successfully!";
@@ -208,6 +235,13 @@ $calendar = buildCalendar($month, $year);
     </div>
 
     <div class="main-content">
+        <div class="top-bar">
+            <h1>Book Pet Grooming</h1>
+            <div>
+                <a href="notifications.php" class="btn-grooming-notifications">Notifications</a>
+                <a href="logout.php" class="btn-grooming-logout">Logout</a>
+            </div>
+        </div>
         <div id="messageContainer" class="message-container"></div>
         <div class="content-grid">
             <div class="calendar-section">

@@ -11,12 +11,27 @@ if(!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 include "db.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
-    $appointmentId = $_POST['appointment_id'];
-    $stmt = $pdo->prepare('DELETE FROM appointments WHERE id = ?');
-    $stmt->execute([$appointmentId]);
-    $_SESSION['success'] = "Appointment deleted successfully.";
-    header("Location: admin_manage_appointments.php");
-    exit();
+    try {
+        $pdo->beginTransaction();
+        
+        $appointmentId = $_POST['appointment_id'];
+        
+        $stmtNotif = $pdo->prepare('DELETE FROM notifications WHERE appointment_id = ?');
+        $stmtNotif->execute([$appointmentId]);
+        
+        $stmtAppt = $pdo->prepare('DELETE FROM appointments WHERE id = ?');
+        $stmtAppt->execute([$appointmentId]);
+        
+        $pdo->commit();
+        $_SESSION['success'] = "Appointment deleted successfully.";
+        header("Location: admin_manage_appointments.php");
+        exit();
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        $_SESSION['error'] = "Error deleting appointment. Please try again.";
+        header("Location: admin_manage_appointments.php");
+        exit();
+    }
 }
 
 $status = isset($_GET['status']) ? $_GET['status'] : 'all';

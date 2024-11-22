@@ -20,10 +20,6 @@ $user = $_SESSION['user'];
     <link rel="stylesheet" href="css/user_dashboard.css">
 </head>
 <body>
-    <button class="hamburger-menu" onclick="toggleSidebar()">
-        <i class="fas fa-bars"></i>
-    </button>
-
     <div class="sidebar">
         <div class="logo">
             <a href="user_dashboard.php">
@@ -49,25 +45,63 @@ $user = $_SESSION['user'];
         <div class="top-bar">
             <h1>Welcome, <?php echo htmlspecialchars($user['name']); ?></h1>
             <div>
-                <button class="btn-notifications" onclick="toggleNotifications()">Notifications</button>
-                <a href="logout.php" class="btn-logout">Logout</a>
+            <a href="notifications.php" class="btn-grooming-notifications">Notifications</a>
+            <a href="logout.php" class="btn-grooming-logout">Logout</a>
             </div>
         </div>
+        
+        <div class="dashboard-grid">
+            <div class="stats-card">
+                <i class="fas fa-calendar-check"></i>
+                <div class="stats-info">
+                    <h3>Upcoming Appointments</h3>
+                    <p>2</p>
+                </div>
+            </div>
+            <div class="stats-card">
+                <i class="fas fa-history"></i>
+                <div class="stats-info">
+                    <h3>Past Bookings</h3>
+                    <p>8</p>
+                </div>
+            </div>
+            <div class="stats-card">
+                <i class="fas fa-paw"></i>
+                <div class="stats-info">
+                    <h3>Registered Pets</h3>
+                    <p>3</p>
+                </div>
+            </div>
 
-        <div class="content-section">
-            <p>You are logged in as <strong><?php echo htmlspecialchars($user['email']); ?></strong>.</p>
+            <div class="dashboard-section recent-bookings">
+                <h2>Recent Bookings</h2>
+                <div class="booking-list">
+                    <div class="booking-item">
+                        <div class="booking-info">
+                            <h4>Pet Grooming</h4>
+                            <p>Date: Oct 15, 2024</p>
+                            <p>Status: Confirmed</p>
+                        </div>
+                    </div>
+                    <div class="booking-item">
+                        <div class="booking-info">
+                            <h4>Pet Boarding</h4>
+                            <p>Date: Oct 10-12, 2024</p>
+                            <p>Status: Completed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-section announcements">
+                <h2>Announcements</h2>
+                <div class="announcement-item">
+                    <h4>Holiday Schedule</h4>
+                    <p>We will be operating with special hours during the upcoming holiday season.</p>
+                    <small>Posted: Oct 1, 2024</small>
+                </div>
+            </div>
         </div>
-        
     </div>
-    
-    <script>
-        function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        }
-        
-        function toggleNotifications() {
-            document.querySelector('.notifications').classList.toggle('show');
-        }
-    </script>
 </body>
 </html>

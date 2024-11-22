@@ -52,7 +52,8 @@ foreach ($services as $service) {
         <div class="top-bar">
             <h1>Grooming Services</h1>
             <div>
-                <button class="btn-notifications">Notifications</button>
+                <a href="notifications.php">
+                <button class="btn-notifications">Notifications</button></a>
                 <a href="logout.php" class="btn-logout">Logout</a>
             </div>
         </div>

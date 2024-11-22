@@ -16,13 +16,28 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = $_POST['action'];
     $newStatus = ($act==='approve')? 'approved':'rejected';
     
+    // Get appointment details for notification
+    $stmt = $pdo->prepare('SELECT user_id, appointment_date, appointment_time FROM appointments WHERE id = ?');
+    $stmt->execute([$a_id]);
+    $appointment = $stmt->fetch();
+    
     if($act === 'reject') {
-      $reason=$_POST['rejection_reason'];
+        $reason = $_POST['rejection_reason'];
         $q = $pdo->prepare('UPDATE appointments SET status = ?, rejection_reason = ? WHERE id = ?');
         $q->execute([$newStatus, $reason, $a_id]);
-    } else{
-        $q=$pdo->prepare("UPDATE appointments SET status = ? WHERE id = ?");  
+        
+        // Create rejection notification
+        $message = "Your appointment for {$appointment['appointment_date']} at {$appointment['appointment_time']} has been rejected. Reason: $reason";
+        $stmt = $pdo->prepare('INSERT INTO notifications (user_id, message, type) VALUES (?, ?, "rejection")');
+        $stmt->execute([$appointment['user_id'], $message]);
+    } else {
+        $q = $pdo->prepare("UPDATE appointments SET status = ? WHERE id = ?");  
         $q->execute([$newStatus, $a_id]);
+        
+        // Create approval notification
+        $message = "Your appointment for {$appointment['appointment_date']} at {$appointment['appointment_time']} has been approved!";
+        $stmt = $pdo->prepare('INSERT INTO notifications (user_id, message, type) VALUES (?, ?, "approval")');
+        $stmt->execute([$appointment['user_id'], $message]);
     }
     
     header('Location: admin_appointments.php');
