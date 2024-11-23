@@ -45,7 +45,58 @@ $admin = $_SESSION['user'];
         <h1>Welcome, <?php echo htmlspecialchars($admin['name']); ?></h1>
         <a href="logout.php" class="btn-logout">Logout</a>
     </div>
-    <hr> 
+    <hr>
+    
+    <div class="stats-container">
+        <div class="stat-card">
+            <i class="fas fa-calendar-check"></i>
+            <div class="stat-info">
+                <h3>Pending Appointments</h3>
+                <p>12</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-hotel"></i>
+            <div class="stat-info">
+                <h3>Active Boardings</h3>
+                <p>8</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-paw"></i>
+            <div class="stat-info">
+                <h3>Total Pets</h3>
+                <p>45</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="recent-activities">
+        <h2>Recent Activities</h2>
+        <div class="activity-list">
+            <div class="activity-item">
+                <i class="fas fa-calendar-plus"></i>
+                <div class="activity-info">
+                    <p>New appointment booked by John Doe</p>
+                    <span>2 hours ago</span>
+                </div>
+            </div>
+            <div class="activity-item">
+                <i class="fas fa-paw"></i>
+                <div class="activity-info">
+                    <p>New boarding reservation for Max</p>
+                    <span>5 hours ago</span>
+                </div>
+            </div>
+            <div class="activity-item">
+                <i class="fas fa-comment"></i>
+                <div class="activity-info">
+                    <p>New feedback received from Sarah Smith</p>
+                    <span>1 day ago</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>
